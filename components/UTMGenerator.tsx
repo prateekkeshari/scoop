@@ -124,7 +124,6 @@ const UTMLinkForge = () => {
         </Button>
       </div>
   
-      
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
         <Card className="shadow-sm bg-white dark:bg-black rounded-lg overflow-hidden mb-4 sm:mb-8 flex-1 w-full">
           <CardContent className="p-4 sm:p-6 flex flex-col h-full">
@@ -175,7 +174,16 @@ const UTMLinkForge = () => {
                     size="icon"
                     className={`transition-all duration-200 ${copied ? 'bg-green-100 dark:bg-green-900' : ''}`}
                   >
-                    {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                    {copied ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -183,7 +191,7 @@ const UTMLinkForge = () => {
   
             <div className="flex flex-col sm:flex-row justify-between mt-auto pt-4 sm:pt-6 gap-4">
               <Button variant="default" className="group relative w-full sm:w-auto" onClick={() => setIsDrawerOpen(true)}>
-                <Download className="w-4 h-4 mr-2" /> Download QR
+                Generate QR
               </Button>
               <Button onClick={fetchPreview} variant="secondary" className="group relative w-full sm:w-auto">
                 See Preview
@@ -206,86 +214,86 @@ const UTMLinkForge = () => {
                 <Skeleton className="h-4 w-full" />
               </div>
             ) : preview ? (
-                <div className="space-y-4 flex flex-col h-full">
+              <div className="space-y-4 flex flex-col h-full">
                 <img src={preview.ogImage} alt="OG Image" className="w-full h-48 object-cover rounded-lg" />
                 <div className="flex items-center space-x-2">
-                    <img src={preview.favicon} alt="Favicon" className="w-4 h-4" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
-                    </p>
-                  </div>
-              <h3 className="text-lg font-semibold">{preview.title}</h3>
-              <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">{preview.description}</p>
-              <Button variant="outline" className="mt-auto w-full">
-                Visit {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4 flex flex-col h-full">
-              <img src="https://framerusercontent.com/assets/DaNDLs98SHLZEDquWqOFa2Fvsc.png" alt="OG Image" className="w-full h-48 object-cover rounded-lg" />
-              <div className="flex items-center space-x-2">
-                <img src="https://framerusercontent.com/images/41z34GiRLR8yFGBI0derDTlNWA.png" alt="Favicon" className="w-4 h-4" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">prateekkeshari.com</p>
+                  <img src={preview.favicon} alt="Favicon" className="w-4 h-4" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
+                  </p>
+                </div>
+                <h3 className="text-lg font-semibold">{preview.title}</h3>
+                <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">{preview.description}</p>
+                <Button variant="outline" className="mt-auto w-full">
+                  Visit {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
+                </Button>
               </div>
-              <h3 className="text-lg font-semibold">Prateek Keshari | Marketer and Creative | Berlin</h3>
-              <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">Prateek Keshari is a product marketer, AI enthusiast, and creative based in Berlin. He currently works for GetYourGuide. Previously, he led Employer Brand at Agoda.</p>
-              <Button variant="outline" className="mt-auto w-full">
-                Visit prateekkeshari.com
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-    <AnimatePresence>
-      {isDrawerOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
-          onClick={() => setIsDrawerOpen(false)}
-        >
+            ) : (
+              <div className="space-y-4 flex flex-col h-full">
+                <img src="https://framerusercontent.com/assets/DaNDLs98SHLZEDquWqOFa2Fvsc.png" alt="OG Image" className="w-full h-48 object-cover rounded-lg" />
+                <div className="flex items-center space-x-2">
+                  <img src="https://framerusercontent.com/images/41z34GiRLR8yFGBI0derDTlNWA.png" alt="Favicon" className="w-4 h-4" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">prateekkeshari.com</p>
+                </div>
+                <h3 className="text-lg font-semibold">Prateek Keshari | Marketer and Creative | Berlin</h3>
+                <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">Prateek Keshari is a product marketer, AI enthusiast, and creative based in Berlin. He currently works for GetYourGuide. Previously, he led Employer Brand at Agoda.</p>
+                <Button variant="outline" className="mt-auto w-full">
+                  Visit prateekkeshari.com
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      <AnimatePresence>
+        {isDrawerOpen && (
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-white dark:bg-black p-6 rounded-t-2xl w-full max-w-lg"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
+            onClick={() => setIsDrawerOpen(false)}
           >
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.3 }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-white dark:bg-black p-6 rounded-t-2xl w-full max-w-lg"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-center mb-4">
-                <h2 className="text-md font-semibold pb-1">Open camera to test</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">This URL points to {url || 'prateekkeshari.com'} with UTMs.</p>
-              </div>
-              <Card className="p-4 rounded-lg shadow-sm flex justify-center items-center">
-                {typeof window !== 'undefined' && <QRCode id="qr-code" value={generatedUrl || 'https://prateekkeshari.com'} size={200} />}
-              </Card>
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.3 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
               >
-                <Button onClick={downloadQR} className="w-full mt-4 text-white bg-black dark:bg-white dark:text-black">
-                  Save QR
-                </Button>
+                <div className="text-center mb-4">
+                  <h2 className="text-md font-semibold pb-1">Open camera to test</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">This URL points to {url || 'prateekkeshari.com'} with UTMs.</p>
+                </div>
+                <Card className="p-4 rounded-lg shadow-sm flex justify-center items-center">
+                  {typeof window !== 'undefined' && <QRCode id="qr-code" value={generatedUrl || 'https://prateekkeshari.com'} size={200} />}
+                </Card>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                >
+                  <Button onClick={downloadQR} className="w-full mt-4 text-white bg-black dark:bg-white dark:text-black">
+                    Save QR
+                  </Button>
+                </motion.div>
               </motion.div>
             </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-    <footer className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-      Made by <a href="https://prateekkeshari.com" className="text-orange-500">Prateek Keshari</a> in Berlin.
-    </footer>
-  </div>
-)
+        )}
+      </AnimatePresence>
+      <footer className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
+        Made by <a href="https://prateekkeshari.com" className="text-orange-500">Prateek Keshari</a> in Berlin.
+      </footer>
+    </div>
+  )
 }
 
 export default dynamic(() => Promise.resolve(UTMLinkForge), { ssr: false })
