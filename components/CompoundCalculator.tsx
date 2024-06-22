@@ -76,7 +76,7 @@ const CompoundCalculator = () => {
         transition={{ duration: 0.5 }}
         className="text-5xl font-extrabold mb-12 text-center text-gray-800"
       >
-        Compound Interest Calculator
+        Compound calculator.
       </motion.h1>
       <Card className="shadow-lg bg-white rounded-xl">
         <CardContent className="p-0">
