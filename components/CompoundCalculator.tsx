@@ -74,7 +74,7 @@ const CompoundCalculator = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-5xl font-extrabold mb-12 text-center text-gray-800"
+        className="text-2xl font-extrabold mb-12 text-center text-gray-800"
       >
         Compound calculator.
       </motion.h1>
