@@ -9,6 +9,8 @@ import axios from 'axios'
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTheme } from "next-themes"
 import dynamic from 'next/dynamic'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 // Dynamically import icon components
 const Copy = dynamic(() => import('lucide-react').then(mod => mod.Copy), { ssr: false })
@@ -32,10 +34,25 @@ const UTMLinkForge = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const [logo, setLogo] = useState<string | null>(null)
+  const [showAlert, setShowAlert] = useState(false)
 
   useEffect(() => {
     generateUTMUrl()
   }, [url, utmValues])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isDrawerOpen) {
+        setIsDrawerOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown as any)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown as any)
+    }
+  }, [isDrawerOpen])
 
   const isValidUrl = (url: string) => {
     try {
@@ -64,7 +81,11 @@ const UTMLinkForge = () => {
   }
 
   const fetchPreview = async () => {
-    if (!generatedUrl) return
+    if (!generatedUrl) {
+      setShowAlert(true)
+      setTimeout(() => setShowAlert(false), 3000)
+      return
+    }
     setIsLoading(true)
     try {
       const response = await axios.get(`/api/preview?url=${encodeURIComponent(generatedUrl)}`)
@@ -96,7 +117,20 @@ const UTMLinkForge = () => {
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      if (!url) {
+        setShowAlert(true)
+        setTimeout(() => setShowAlert(false), 3000)
+        return
+      }
       fetchPreview();
+    }
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      if (!url) {
+        setShowAlert(true)
+        setTimeout(() => setShowAlert(false), 3000)
+        return
+      }
+      setIsDrawerOpen(true);
     }
   };
 
@@ -156,6 +190,15 @@ const UTMLinkForge = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-8 font-inter text-gray-900 dark:text-gray-100">
+      {showAlert && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Please enter a valid URL before generating QR or preview.
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
         <div>
           <motion.h1
@@ -243,11 +286,18 @@ const UTMLinkForge = () => {
             </div>
   
             <div className="flex flex-col sm:flex-row justify-between mt-auto pt-4 sm:pt-6 gap-4">
-              <Button variant="default" className="group relative w-full sm:w-auto" onClick={() => setIsDrawerOpen(true)}>
-                Generate QR
+              <Button variant="default" className="group relative w-full sm:w-auto" onClick={() => {
+                if (!url) {
+                  setShowAlert(true)
+                  setTimeout(() => setShowAlert(false), 3000)
+                  return
+                }
+                setIsDrawerOpen(true)
+              }}>
+                Generate QR <span className="text-gray-400 ml-2">⌘ + ↵</span>
               </Button>
-              <Button onClick={fetchPreview} variant="secondary" className="group relative w-full sm:w-auto">
-                See Preview
+              <Button onClick={fetchPreview} variant="outline" className="group relative w-full sm:w-auto justify-end">
+               See Preview <span className="text-gray-400 ml-2">↵</span>
               </Button>
             </div>
           </CardContent>
@@ -323,8 +373,8 @@ const UTMLinkForge = () => {
               >
                 <div className="flex flex-col items-center mb-4">
                   <div className="text-center">
-                    <h2 className="text-md font-semibold pb-1">Opens {url || 'prateekkeshari.com'}</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Add logo below to customize.</p>
+                    <h2 className="text-md font-semibold pb-1">QR opens {url || 'prateekkeshari.com'}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Add logo to customize</p>
                   </div>
                 </div>
                 <div className="mt-4 mb-4 w-1/2 mx-auto flex justify-center">
@@ -381,7 +431,7 @@ const UTMLinkForge = () => {
                     className="w-full mt-4 text-white bg-black dark:bg-white dark:text-black flex items-center justify-center"
                   >
                     <Download className="mr-2" size={18} />
-                    Download QR Code
+                    Download QR
                   </Button>
                 </motion.div>
               </motion.div>
