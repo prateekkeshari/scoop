@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: "Scoop is a simple tool to generate UTM parameters, QR codes, and social media previews for your marketing campaigns.",
     images: [
       {
-        url: "public/og-image.jpg",
+        url: "/og-image.jpg",
         width: 1920,
         height: 1080,
         alt: "Scoop OG Image",
