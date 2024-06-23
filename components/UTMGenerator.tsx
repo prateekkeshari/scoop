@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useTheme } from "next-themes"
 import dynamic from 'next/dynamic'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, XCircle } from "lucide-react"
 
 // Dynamically import icon components
 const Copy = dynamic(() => import('lucide-react').then(mod => mod.Copy), { ssr: false })
@@ -35,6 +35,7 @@ const UTMLinkForge = () => {
   const { theme, setTheme } = useTheme()
   const [logo, setLogo] = useState<string | null>(null)
   const [showAlert, setShowAlert] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     generateUTMUrl()
@@ -64,7 +65,11 @@ const UTMLinkForge = () => {
   }
 
   const generateUTMUrl = () => {
-    if (!isValidUrl(url)) return
+    if (url && !isValidUrl(url)) {
+      setErrorMessage('Invalid URL. Please enter a valid URL.')
+      return
+    }
+    setErrorMessage('')
     const params = new URLSearchParams()
     Object.entries(utmValues).forEach(([key, value]) => {
       if (value) params.append(`utm_${key}`, value)
@@ -93,6 +98,9 @@ const UTMLinkForge = () => {
     } catch (error) {
       console.error('Error fetching preview:', error)
       setPreview(null)
+      setErrorMessage(
+        'Unable to fetch preview. Please check the URL and try again.'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -191,12 +199,16 @@ const UTMLinkForge = () => {
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-8 font-inter text-gray-900 dark:text-gray-100">
       {showAlert && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Please enter a valid URL before generating QR or preview.
-          </AlertDescription>
+        <Alert variant="destructive" className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-md">
+          <div className="flex items-center">
+            <AlertCircle className="h-6 w-6 text-red-500 mr-3" />
+            <div>
+              <AlertTitle className="text-lg font-semibold text-red-700">Oops.</AlertTitle>
+              <AlertDescription className="text-red-600 mt-1">
+                Please enter a valid URL before generating QR or preview.
+              </AlertDescription>
+            </div>
+          </div>
         </Alert>
       )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
@@ -205,9 +217,10 @@ const UTMLinkForge = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-2xl font-bold mb-1"
+            className="text-2xl font-bold mb-2 flex items-center"
           >
-            Tiny Link
+            <img src="icons/scoop.png" alt="Icon" className="h-6 w-6 mr-2" />
+            <span className="drop-shadow-[0_1px_12px_rgba(255,255,255,0.7)]">Scoop</span>
           </motion.h1>
           <p className="text-md text-gray-400 dark:text-gray-500">
             Generate UTM links, QR, and meta preview.
@@ -223,19 +236,22 @@ const UTMLinkForge = () => {
           <CardContent className="p-4 sm:p-6 flex flex-col h-full">
             <div className="space-y-4 sm:space-y-6 flex-grow">
               <div>
-                <Label htmlFor="url" className="text-sm font-medium mb-1 block pb-2">Enter URL</Label>
+                <Label htmlFor="url" className="text-sm font-medium mb-1 block pb-2">Enter URL *</Label>
                 <Input
                   id="url"
                   type="text"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className={`w-full transition-all duration-200 ${isValidUrl(url) ? 'border-green-500' : 'border-gray-300 dark:border-gray-700'}`}
+                  className={`w-full transition-all duration-200 ${url && isValidUrl(url) ? 'border-green-500' : 'border-gray-300 dark:border-gray-700'}`}
                   placeholder="https://prateekkeshari.com"
+                  required
                 />
+                {errorMessage && url && (
+                  <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+                )}
               </div>
               
-  
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {Object.keys(utmValues).map((key) => (
                   <div key={key}>
@@ -276,8 +292,8 @@ const UTMLinkForge = () => {
                       </svg>
                     ) : (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                       </svg>
                     )}
                   </Button>
@@ -294,10 +310,10 @@ const UTMLinkForge = () => {
                 }
                 setIsDrawerOpen(true)
               }}>
-                Generate QR <span className="text-gray-400 ml-2">⌘ + ↵</span>
+                Generate QR <span className="text-gray-400 ml-2 hidden sm:inline">⌘ + ↵</span>
               </Button>
-              <Button onClick={fetchPreview} variant="outline" className="group relative w-full sm:w-auto justify-end">
-               See Preview <span className="text-gray-400 ml-2">↵</span>
+              <Button onClick={fetchPreview} variant="outline" className="group relative w-full sm:w-auto">
+               See Preview <span className="text-gray-400 ml-2 hidden sm:inline">↵</span>
               </Button>
             </div>
           </CardContent>
@@ -373,7 +389,7 @@ const UTMLinkForge = () => {
               >
                 <div className="flex flex-col items-center mb-4">
                   <div className="text-center">
-                    <h2 className="text-md font-semibold pb-1">QR opens {url || 'prateekkeshari.com'}</h2>
+                    <h2 className="text-md font-semibold pb-1">QR opens {url?.replace(/^(https?:\/\/)?(www\.)?/, '') || 'prateekkeshari.com'}</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Add logo to customize</p>
                   </div>
                 </div>
@@ -441,7 +457,12 @@ const UTMLinkForge = () => {
       </AnimatePresence>
 
       <footer className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-        Made by <a href="https://prateekkeshari.com" className="text-orange-500">Prateek Keshari</a> in Berlin.
+        Made by <a href="https://prateekkeshari.com" className="relative inline-block transition-all duration-300">
+          <span className="transition-all duration-300 hover:text-orange-500">
+            Prateek Keshari
+          </span>
+          <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-500 transition-all duration-300 group-hover:w-full"></span>
+        </a> in Berlin.
       </footer>
     </div>
   )

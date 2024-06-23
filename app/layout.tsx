@@ -6,8 +6,8 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Compound Interest Calculator",
-  description: "Calculate and visualize compound interest over time",
+  title: "Scoop – UTM, QR, and Preview generator",
+  description: "Scoop is a simple tool to generate UTM parameters, QR codes, and social media previews for your marketing campaigns."
 }
 
 export default function RootLayout({
