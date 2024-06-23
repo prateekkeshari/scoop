@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, KeyboardEvent } from 'react'
+import React, { useState, useEffect, KeyboardEvent, ChangeEvent } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,6 +31,7 @@ const UTMLinkForge = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { theme, setTheme } = useTheme()
+  const [logo, setLogo] = useState<string | null>(null)
 
   useEffect(() => {
     generateUTMUrl()
@@ -103,6 +104,56 @@ const UTMLinkForge = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
+  const handleLogoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const imageDataUrl = reader.result as string;
+        try {
+          const grayscaleImage = await applyGrayscale(imageDataUrl);
+          setLogo(grayscaleImage);
+        } catch (error) {
+          console.error('Error applying grayscale:', error);
+          setLogo(null);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const applyGrayscale = (imageDataUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          
+          for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = avg;
+            data[i + 1] = avg;
+            data[i + 2] = avg;
+          }
+          
+          ctx.putImageData(imageData, 0, 0);
+          resolve(canvas.toDataURL());
+        } else {
+          reject(new Error('Could not get canvas context'));
+        }
+      };
+      img.onerror = reject;
+      img.src = imageDataUrl;
+    });
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-8 font-inter text-gray-900 dark:text-gray-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
@@ -140,6 +191,7 @@ const UTMLinkForge = () => {
                   placeholder="https://prateekkeshari.com"
                 />
               </div>
+              
   
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {Object.keys(utmValues).map((key) => (
@@ -149,7 +201,7 @@ const UTMLinkForge = () => {
                     </Label>
                     <Input
                       id={`utm_${key}`}
-                      placeholder={`Enter ${key}`}
+                      placeholder={`e.g., ${key === 'source' ? 'google' : key === 'medium' ? 'cpc' : key === 'campaign' ? 'summer_sale' : key === 'term' ? 'running+shoes' : 'blue_banner'}`}
                       value={utmValues[key as keyof typeof utmValues]}
                       onChange={(e) => handleUtmValueChange(key as keyof typeof utmValues, e.target.value)}
                       onKeyDown={handleKeyDown}
@@ -167,6 +219,7 @@ const UTMLinkForge = () => {
                     value={generatedUrl}
                     readOnly
                     className="flex-grow bg-gray-50 dark:bg-black"
+                    placeholder="https://prateekkeshari.com?utm_source=google&utm_medium=cpc&utm_campaign=summer_sale"
                   />
                   <Button
                     onClick={copyToClipboard}
@@ -260,7 +313,7 @@ const UTMLinkForge = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white dark:bg-black p-6 rounded-t-2xl w-full max-w-lg"
+              className="bg-white dark:bg-[#0A0A0B] p-6 rounded-t-2xl w-full max-w-lg"
               onClick={(e) => e.stopPropagation()}
             >
               <motion.div
@@ -268,20 +321,67 @@ const UTMLinkForge = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.3 }}
               >
-                <div className="text-center mb-4">
-                  <h2 className="text-md font-semibold pb-1">Open camera to test</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">This URL points to {url || 'prateekkeshari.com'} with UTMs.</p>
+                <div className="flex flex-col items-center mb-4">
+                  <div className="text-center">
+                    <h2 className="text-md font-semibold pb-1">Opens {url || 'prateekkeshari.com'}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Add logo below to customize.</p>
+                  </div>
                 </div>
-                <Card className="p-4 rounded-lg shadow-sm flex justify-center items-center">
-                  {typeof window !== 'undefined' && <QRCode id="qr-code" value={generatedUrl || 'https://prateekkeshari.com'} size={200} />}
+                <div className="mt-4 mb-4 w-1/2 mx-auto flex justify-center">
+                  <Input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = async () => {
+                          const imageDataUrl = reader.result as string;
+                          try {
+                            const grayscaleImage = await applyGrayscale(imageDataUrl);
+                            setLogo(grayscaleImage);
+                          } catch (error) {
+                            console.error('Error applying grayscale:', error);
+                            setLogo(null);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full text-center"
+                  />
+                </div>
+                <Card className="p-4 rounded-lg shadow-sm flex flex-col items-center">
+                  {typeof window !== 'undefined' && (
+                    <QRCode
+                      id="qr-code"
+                      value={generatedUrl || 'https://prateekkeshari.com'}
+                      size={200}
+                      level="H"
+                      imageSettings={logo ? {
+                        src: logo,
+                        excavate: true,
+                        width: 40,
+                        height: 40,
+                        x: undefined,
+                        y: undefined,
+                      } : undefined}
+                    />
+                  )}
                 </Card>
+                
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.3 }}
                 >
-                  <Button onClick={downloadQR} className="w-full mt-4 text-white bg-black dark:bg-white dark:text-black">
-                    Save QR
+                  <Button 
+                    onClick={downloadQR} 
+                    className="w-full mt-4 text-white bg-black dark:bg-white dark:text-black flex items-center justify-center"
+                  >
+                    <Download className="mr-2" size={18} />
+                    Download QR Code
                   </Button>
                 </motion.div>
               </motion.div>
@@ -289,6 +389,7 @@ const UTMLinkForge = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
       <footer className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
         Made by <a href="https://prateekkeshari.com" className="text-orange-500">Prateek Keshari</a> in Berlin.
       </footer>
