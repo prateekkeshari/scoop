@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, KeyboardEvent, ChangeEvent } from 'react'
+import React, { useState, useEffect, KeyboardEvent, ChangeEvent, useRef } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,12 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useTheme } from "next-themes"
 import dynamic from 'next/dynamic'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, XCircle } from "lucide-react"
+import { AlertCircle, Download } from "lucide-react"
 
 // Dynamically import icon components
-const Copy = dynamic(() => import('lucide-react').then(mod => mod.Copy), { ssr: false })
-const CheckCircle = dynamic(() => import('lucide-react').then(mod => mod.CheckCircle), { ssr: false })
-const Download = dynamic(() => import('lucide-react').then(mod => mod.Download), { ssr: false })
 const Sun = dynamic(() => import('lucide-react').then(mod => mod.Sun), { ssr: false })
 const Moon = dynamic(() => import('lucide-react').then(mod => mod.Moon), { ssr: false })
 
@@ -244,7 +241,7 @@ const UTMLinkForge = () => {
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyDown={handleKeyDown}
                   className={`w-full transition-all duration-200 ${url && isValidUrl(url) ? 'border-green-500' : 'border-gray-300 dark:border-gray-700'}`}
-                  placeholder="https://prateekkeshari.com"
+                  placeholder="stripe.com"
                   required
                 />
                 {errorMessage && url && (
@@ -343,9 +340,11 @@ const UTMLinkForge = () => {
                 </div>
                 <h3 className="text-lg font-semibold">{preview.title}</h3>
                 <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">{preview.description}</p>
-                <Button variant="outline" className="mt-auto w-full">
-                  Visit {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
-                </Button>
+                <div className="mt-auto pt-4">
+                  <Button variant="outline" className="w-full">
+                    Visit {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-4 flex flex-col h-full">
@@ -356,14 +355,17 @@ const UTMLinkForge = () => {
                 </div>
                 <h3 className="text-lg font-semibold">Prateek Keshari | Marketer and Creative | Berlin</h3>
                 <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">Prateek Keshari is a product marketer, AI enthusiast, and creative based in Berlin. He currently works for GetYourGuide. Previously, he led Employer Brand at Agoda.</p>
-                <Button variant="outline" className="mt-auto w-full">
-                  Visit prateekkeshari.com
-                </Button>
+                <div className="mt-auto pt-4">
+                  <Button variant="outline" className="w-full">
+                    Visit prateekkeshari.com
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
+      
       <AnimatePresence>
         {isDrawerOpen && (
           <motion.div

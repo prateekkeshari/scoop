@@ -28,7 +28,9 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "dom-to-image": "^2.6.0",
     "framer-motion": "^11.2.11",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.396.0",
     "nanoid": "^5.0.7",
     "next": "14.2.4",
@@ -44,6 +46,7 @@
   },
   "devDependencies": {
     "@shadcn/ui": "^0.0.4",
+    "@types/html2canvas": "^1.0.0",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18",
