@@ -244,8 +244,8 @@ const UTMLinkForge = () => {
           </p>
         </div>
         <Button onClick={toggleTheme} variant="outline" size="icon" className="mt-4 sm:mt-0">
-          {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
-        </Button>
+  {theme === 'dark' ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
+</Button>
       </div>
   
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
