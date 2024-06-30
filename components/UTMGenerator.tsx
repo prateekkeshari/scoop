@@ -40,43 +40,6 @@ const UTMLinkForge = () => {
   const [showAlert, setShowAlert] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  useEffect(() => {
-    // Load the URL and UTM values from localStorage when the component mounts
-    const savedUrl = localStorage.getItem('savedUrl')
-    const savedUtmValues = localStorage.getItem('savedUtmValues')
-    const savedPreview = localStorage.getItem('savedPreview')
-    if (savedUrl) {
-      setUrl(savedUrl)
-    }
-    if (savedUtmValues) {
-      setUtmValues(JSON.parse(savedUtmValues))
-    }
-    if (savedPreview) {
-      setPreview(JSON.parse(savedPreview))
-    }
-  }, [])
-
-  useEffect(() => {
-    generateUTMUrl()
-    // Save the URL and UTM values to localStorage whenever they change
-    localStorage.setItem('savedUrl', url)
-    localStorage.setItem('savedUtmValues', JSON.stringify(utmValues))
-  }, [url, utmValues])
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isDrawerOpen) {
-        setIsDrawerOpen(false)
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown as any)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown as any)
-    }
-  }, [isDrawerOpen])
-
   const isValidUrl = (url: string) => {
     try {
       new URL(url.startsWith('http') ? url : `https://${url}`)
@@ -100,6 +63,42 @@ const UTMLinkForge = () => {
     const utmUrl = `${urlWithProtocol}${params.toString() ? '?' + params.toString() : ''}`
     setGeneratedUrl(utmUrl)
   }
+
+  useEffect(() => {
+    // Load the URL and UTM values from localStorage when the component mounts
+    const savedUrl = localStorage.getItem('savedUrl')
+    const savedUtmValues = localStorage.getItem('savedUtmValues')
+    const savedPreview = localStorage.getItem('savedPreview')
+    if (savedUrl) {
+      setUrl(savedUrl)
+    }
+    if (savedUtmValues) {
+      setUtmValues(JSON.parse(savedUtmValues))
+    }
+    if (savedPreview) {
+      setPreview(JSON.parse(savedPreview))
+    }
+  }, [])
+
+  useEffect(() => {
+    generateUTMUrl()
+    localStorage.setItem('savedUrl', url)
+    localStorage.setItem('savedUtmValues', JSON.stringify(utmValues))
+  }, [url, utmValues]) // Removed generateUTMUrl from the dependency array
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isDrawerOpen) {
+        setIsDrawerOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown as any)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown as any)
+    }
+  }, [isDrawerOpen])
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedUrl)
