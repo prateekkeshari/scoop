@@ -455,22 +455,23 @@ const UTMLinkForge = () => {
         </div>
 
         <div>
-          <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">UTM Parameters: Definition and Usage</h3>
+          <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">What are UTM parameters?</h3>
           <p className="mb-4">UTM parameters are tags added to website links to track visitor sources. They help you understand which marketing efforts are most effective. With UTM parameters, you can identify which ads, emails, or social media posts are bringing visitors to your site.</p>
           <p className="mb-4">There are five main UTM parameters: source, medium, campaign, term, and content. Source indicates where the traffic comes from, such as Google or Facebook. Medium shows how visitors arrived, like through an email or a paid ad. Campaign name groups related marketing efforts. Term and content are more specific, tracking things like keywords or individual links within a larger campaign.</p>
           <p className="mt-4">Using UTM parameters allows you to make informed decisions about your marketing efforts. You can see which strategies are working well and which ones need improvement or should be discontinued.</p>
         </div>
 
         <div>
-          <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">QR Codes: Function and Marketing Applications</h3>
+          <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">How to generate a QR code online for free using Scoop?</h3>
           <p className="mb-4">QR codes are square, pixelated images that can be scanned with a smartphone camera. When scanned, they quickly direct users to a specific webpage or display information.</p>
+          <p className="mb-4">With Scoop, generating a QR code is simple and efficient. Just enter the URL you want to link to, customize the design if needed, and click generate. Scoop will create a QR code that you can download and use in your marketing materials.</p>
           <p className="mb-4">In marketing, QR codes connect physical and digital experiences. For example, you can add a QR code to a product poster, allowing people to easily access more information, make a purchase, or sign up for updates by scanning the code.</p>
           <p className="mb-4">QR codes also provide tracking capabilities. You can monitor how many people scanned your code, when they did it, and their location. This helps you assess the effectiveness of your offline marketing. Additionally, you can update the destination of the QR code without changing the code itself, providing flexibility in your marketing efforts.</p>
           <p className="mt-4">When using QR codes in marketing, ensure the linked page is mobile-friendly. It's also beneficial to provide an incentive for scanning, such as a discount or exclusive content. This approach adds value for your customers beyond just using the technology.</p>
         </div>
 
         <div>
-          <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Meta Tags: Definition and SEO Benefits</h3>
+          <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">What are meta tags in SEO?</h3>
           <p className="mb-4">Meta tags are text snippets in a website's code that describe the page's content. While not visible on the page itself, search engines and social media platforms use these tags to understand and display your content.</p>
           <p className="mb-4">The title tag and meta description are crucial for SEO. The title tag appears as the clickable headline in search results, while the meta description is the summary below it. These elements are your opportunity to make a good first impression and encourage clicks on your link.</p>
           <p className="mb-4">Open Graph (OG) tags are special meta tags that control how your content appears when shared on social media. They ensure that your page displays with the correct image, title, and description when shared on platforms like Facebook or Twitter.</p>
