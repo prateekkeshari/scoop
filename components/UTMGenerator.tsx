@@ -17,7 +17,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import Image from 'next/image';
 
 // Dynamically import icon components
 const Sun = dynamic(() => import('lucide-react').then(mod => mod.Sun), { ssr: false })
@@ -41,21 +40,6 @@ const UTMLinkForge = () => {
   const [showAlert, setShowAlert] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const generateUTMUrl = () => {
-    if (url && !isValidUrl(url)) {
-      setErrorMessage('Invalid URL. Please enter a valid URL.')
-      return
-    }
-    setErrorMessage('')
-    const params = new URLSearchParams()
-    Object.entries(utmValues).forEach(([key, value]) => {
-      if (value) params.append(`utm_${key}`, value)
-    })
-    const urlWithProtocol = url.startsWith('http') ? url : `https://${url}`
-    const utmUrl = `${urlWithProtocol}${params.toString() ? '?' + params.toString() : ''}`
-    setGeneratedUrl(utmUrl)
-  }
-
   useEffect(() => {
     // Load the URL and UTM values from localStorage when the component mounts
     const savedUrl = localStorage.getItem('savedUrl')
@@ -73,11 +57,11 @@ const UTMLinkForge = () => {
   }, [])
 
   useEffect(() => {
-    generateUTMUrl();
+    generateUTMUrl()
     // Save the URL and UTM values to localStorage whenever they change
-    localStorage.setItem('savedUrl', url);
-    localStorage.setItem('savedUtmValues', JSON.stringify(utmValues));
-  }, [url, utmValues, generateUTMUrl]);
+    localStorage.setItem('savedUrl', url)
+    localStorage.setItem('savedUtmValues', JSON.stringify(utmValues))
+  }, [url, utmValues])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -102,7 +86,20 @@ const UTMLinkForge = () => {
     }
   }
 
- 
+  const generateUTMUrl = () => {
+    if (url && !isValidUrl(url)) {
+      setErrorMessage('Invalid URL. Please enter a valid URL.')
+      return
+    }
+    setErrorMessage('')
+    const params = new URLSearchParams()
+    Object.entries(utmValues).forEach(([key, value]) => {
+      if (value) params.append(`utm_${key}`, value)
+    })
+    const urlWithProtocol = url.startsWith('http') ? url : `https://${url}`
+    const utmUrl = `${urlWithProtocol}${params.toString() ? '?' + params.toString() : ''}`
+    setGeneratedUrl(utmUrl)
+  }
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedUrl)
@@ -192,30 +189,30 @@ const UTMLinkForge = () => {
 
   const applyGrayscale = (imageDataUrl: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const img = new window.Image(); // Explicitly use window.Image
+      const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Could not get canvas context'));
-          return;
-        }
         canvas.width = img.width;
         canvas.height = img.height;
         
-        ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        for (let i = 0; i < data.length; i += 4) {
-          const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-          data[i] = avg;
-          data[i + 1] = avg;
-          data[i + 2] = avg;
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          
+          for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = avg;
+            data[i + 1] = avg;
+            data[i + 2] = avg;
+          }
+          
+          ctx.putImageData(imageData, 0, 0);
+          resolve(canvas.toDataURL());
+        } else {
+          reject(new Error('Could not get canvas context'));
         }
-        
-        ctx.putImageData(imageData, 0, 0);
-        resolve(canvas.toDataURL());
       };
       img.onerror = reject;
       img.src = imageDataUrl;
@@ -223,7 +220,7 @@ const UTMLinkForge = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-8 font-inter text-gray-900 dark:text-gray-100 mt-40">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-8 font-inter text-gray-900 dark:text-gray-100">
       {showAlert && (
         <Alert variant="destructive" className="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-md">
           <div className="flex items-center">
@@ -237,7 +234,7 @@ const UTMLinkForge = () => {
           </div>
         </Alert>
       )}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
         <div>
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
@@ -245,25 +242,24 @@ const UTMLinkForge = () => {
             transition={{ duration: 0.5 }}
             className="text-2xl font-bold mb-2 flex items-center"
           >
-            <img src="icons/scoop.png" alt="Scoop Logo" className="h-6 w-6 mr-2" />
+            <img src="icons/scoop.png" alt="Icon" className="h-6 w-6 mr-2" />
             <span className="drop-shadow-[0_1px_12px_rgba(255,255,255,0.7)]">Scoop</span>
           </motion.h1>
           <p className="text-md text-gray-400 dark:text-gray-500">
-            Free UTM Builder, QR Code Generator, and Link Preview Tool
+            Generate UTM links, QR, and meta preview.
           </p>
         </div>
         <Button onClick={toggleTheme} variant="outline" size="icon" className="mt-4 sm:mt-0">
-          {theme === 'dark' ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
-        </Button>
-      </header>
+  {theme === 'dark' ? <Moon className="h-[1.2rem] w-[1.2rem]" /> : <Sun className="h-[1.2rem] w-[1.2rem]" />}
+</Button>
+      </div>
   
-      <section className="flex flex-col lg:flex-row gap-4 sm:gap-8 mb-12">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
         <Card className="shadow-sm bg-white dark:bg-black rounded-lg overflow-hidden mb-4 sm:mb-8 flex-1 w-full">
           <CardContent className="p-4 sm:p-6 flex flex-col h-full">
-
             <div className="space-y-4 sm:space-y-6 flex-grow">
               <div>
-                <Label htmlFor="url"                 className="text-sm font-medium mb-1 block pb-2">Enter URL *</Label>
+                <Label htmlFor="url" className="text-sm font-medium mb-1 block pb-2">Enter URL *</Label>
                 <Input
                   id="url"
                   type="text"
@@ -351,38 +347,51 @@ const UTMLinkForge = () => {
           onClick={() => window.open(generatedUrl || url || 'https://prateekkeshari.com', '_blank')}
         >
           <CardContent className="p-4 sm:p-6 flex flex-col h-full">
-          
             {isLoading ? (
               <div className="space-y-2 flex-grow flex flex-col justify-center">
                 <Skeleton className="h-48 w-full" />
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-full" />
               </div>
             ) : preview ? (
-              <div className="space-y-4 flex-grow">
-                {preview.ogImage && (
-                  <Image src={preview.ogImage} alt="Preview" width={600} height={300} className="w-full h-48 object-cover rounded-lg" />
-                )}
+              <div className="space-y-4 flex flex-col h-full">
+                <img src={preview.ogImage} alt="OG Image" className="w-full h-48 object-cover rounded-lg" />
                 <div className="flex items-center space-x-2">
-                  {preview.favicon && (
-                    <Image src={preview.favicon} alt="Favicon" width={16} height={16} className="w-4 h-4" />
-                  )}
-                  <p className="text-sm text-gray-500 truncate">{new URL(preview.url).hostname}</p>
+                  <img src={preview.favicon} alt="Favicon" className="w-4 h-4" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
+                  </p>
                 </div>
                 <h3 className="text-lg font-semibold">{preview.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{preview.description}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">{preview.description}</p>
+                <div className="mt-auto pt-4">
+                  <Button variant="outline" className="w-full">
+                    Visit {url ? new URL(url.startsWith('http') ? url : `https://${url}`).hostname : 'prateekkeshari.com'}
+                  </Button>
+                </div>
               </div>
             ) : (
-              <div className="flex-grow flex items-center justify-center">
-                <p className="text-gray-500 dark:text-gray-400">Enter a URL and click "See Preview" to view the link preview</p>
+              <div className="space-y-4 flex flex-col h-full">
+                <img src="https://framerusercontent.com/assets/DaNDLs98SHLZEDquWqOFa2Fvsc.png" alt="OG Image" className="w-full h-48 object-cover rounded-lg" />
+                <div className="flex items-center space-x-2">
+                  <img src="https://framerusercontent.com/images/41z34GiRLR8yFGBI0derDTlNWA.png" alt="Favicon" className="w-4 h-4" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">prateekkeshari.com</p>
+                </div>
+                <h3 className="text-lg font-semibold">Prateek Keshari | Marketer and Creative | Berlin</h3>
+                <p className="text-sm text-gray-700 dark:text-gray-300 flex-grow">Prateek Keshari is a product marketer, AI enthusiast, and creative based in Berlin. He currently works for GetYourGuide. Previously, he led Employer Brand at Agoda.</p>
+                <div className="mt-auto pt-4">
+                  <Button variant="outline" className="w-full">
+                    Visit prateekkeshari.com
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
-      </section>
-
+      </div>
+      
       <AnimatePresence>
         {isDrawerOpen && (
           <motion.div
@@ -390,7 +399,7 @@ const UTMLinkForge = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
             onClick={() => setIsDrawerOpen(false)}
           >
             <motion.div
@@ -398,64 +407,83 @@ const UTMLinkForge = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white dark:bg-[#0A0A0B] p-6 rounded-2xl w-full max-w-md"
+              className="bg-white dark:bg-[#0A0A0B] p-6 rounded-t-2xl w-full max-w-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="mb-4">
-                <Label htmlFor="qr-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  QR code URL
-                </Label>
-                <Input
-                  id="qr-text"
-                  type="text"
-                  value={generatedUrl || url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className="w-full"
-                  placeholder="Enter text for QR code"
-                />
-              </div>
-              <div className="flex justify-center mb-6">
-                <QRCode
-                  id="qr-code"
-                  value={generatedUrl || url}
-                  size={200}
-                  level="H"
-                  includeMargin={true}
-                  imageSettings={logo ? {
-                    src: logo,
-                    x: undefined,
-                    y: undefined,
-                    height: 40,
-                    width: 40,
-                    excavate: true,
-                  } : undefined}
-                />
-              </div>
-              
-              <div className="flex justify-between mb-6">
-                <Button onClick={() => document.getElementById('logo-upload')?.click()} variant="outline" className="w-1/2 mr-2">
-                  Upload Logo
-                </Button>
-                <input
-                  id="logo-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                />
-                <Button onClick={downloadQR} variant="default" className="w-1/2 ml-2">
-                  <Download className="mr-2 h-4 w-4" /> Download QR
-                </Button>
-              </div>
-              <Button onClick={() => setIsDrawerOpen(false)} variant="outline" className="w-full">
-                Close
-              </Button>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
+                <div className="flex flex-col items-center mb-4">
+                  <div className="text-center">
+                    <h2 className="text-md font-semibold pb-1">QR opens {url?.replace(/^(https?:\/\/)?(www\.)?/, '') || 'prateekkeshari.com'}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Add logo to customize</p>
+                  </div>
+                </div>
+                <div className="mt-4 mb-4 w-1/2 mx-auto flex justify-center">
+                  <Input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = async () => {
+                          const imageDataUrl = reader.result as string;
+                          try {
+                            const grayscaleImage = await applyGrayscale(imageDataUrl);
+                            setLogo(grayscaleImage);
+                          } catch (error) {
+                            console.error('Error applying grayscale:', error);
+                            setLogo(null);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full text-center"
+                  />
+                </div>
+                <Card className="p-4 rounded-lg shadow-sm flex flex-col items-center">
+                  {typeof window !== 'undefined' && (
+                    <QRCode
+                      id="qr-code"
+                      value={generatedUrl || 'https://prateekkeshari.com'}
+                      size={200}
+                      level="H"
+                      imageSettings={logo ? {
+                        src: logo,
+                        excavate: true,
+                        width: 40,
+                        height: 40,
+                        x: undefined,
+                        y: undefined,
+                      } : undefined}
+                    />
+                  )}
+                </Card>
+                
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                >
+                  <Button 
+                    onClick={downloadQR} 
+                    className="w-full mt-4 text-white bg-black dark:bg-white dark:text-black flex items-center justify-center"
+                  >
+                    <Download className="mr-2" size={18} />
+                    Download QR
+                  </Button>
+                </motion.div>
+              </motion.div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <div className="max-w-3xl mx-auto">
+<div className="max-w-3xl mx-auto">
       <footer className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8 mb-12">
         Made by <a href="https://prateekkeshari.com" className="relative inline-block transition-all duration-300">
           <span className="transition-all duration-300 hover:text-orange-500">
@@ -644,6 +672,4 @@ const UTMLinkForge = () => {
   )
 }
 
-
-
-export default dynamic(() => Promise.resolve(UTMLinkForge), { ssr: false });
+export default dynamic(() => Promise.resolve(UTMLinkForge), { ssr: false })
