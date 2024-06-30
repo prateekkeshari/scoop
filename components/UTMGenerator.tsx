@@ -497,7 +497,7 @@ const UTMLinkForge = () => {
         <div>
           <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Free UTM Builder, QR Code Generator, and Meta Tag Preview Tool</h3>
           <p className="mb-4">Scoop is a free, all-in-one tool designed to simplify and enhance your digital marketing efforts. Built by Prateek Keshari, Scoop combines a UTM builder, QR code generator, and meta tag optimizer into one user-friendly platform.</p>
-          <p className="mb-4">With Scoop, you can easily create trackable links with UTM parameters, generate customizable QR codes, and optimize your meta tags for better SEO and social sharing. Whether you're a small business owner, a marketing professional, or a content creator, Scoop provides the tools you need to improve your online presence and track your marketing campaigns effectively.</p>
+          <p className="mb-4">With Scoop, you can easily create trackable links with UTM parameters, generate customizable QR codes, and optimize your meta tags for better SEO and social sharing. Whether you&apos;re a small business owner, a marketing professional, or a content creator, Scoop provides the tools you need to improve your online presence and track your marketing campaigns effectively.</p>
           <p className="mt-4">Best of all, Scoop is completely free to use. We believe in making powerful marketing tools accessible to everyone, helping businesses of all sizes compete in the digital landscape. Start using Scoop today to streamline your marketing efforts and gain valuable insights into your online campaigns.</p>
         </div>
 
@@ -513,12 +513,12 @@ const UTMLinkForge = () => {
           <p className="mb-4">QR codes are square, pixelated images that can be scanned with a smartphone camera. When scanned, they quickly direct users to a specific webpage or display information.</p>
           <p className="mb-4">In marketing, QR codes connect physical and digital experiences. For example, you can add a QR code to a product poster, allowing people to easily access more information, make a purchase, or sign up for updates by scanning the code.</p>
           <p className="mb-4">QR codes also provide tracking capabilities. You can monitor how many people scanned your code, when they did it, and their location. This helps you assess the effectiveness of your offline marketing. Additionally, you can update the destination of the QR code without changing the code itself, providing flexibility in your marketing efforts.</p>
-          <p className="mt-4">When using QR codes in marketing, ensure the linked page is mobile-friendly. It's also beneficial to provide an incentive for scanning, such as a discount or exclusive content. This approach adds value for your customers beyond just using the technology.</p>
+          <p className="mt-4">When using QR codes in marketing, ensure the linked page is mobile-friendly. It&apos;s also beneficial to provide an incentive for scanning, such as a discount or exclusive content. This approach adds value for your customers beyond just using the technology.</p>
         </div>
 
         <div>
           <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Meta Tags: Definition and SEO Benefits</h3>
-          <p className="mb-4">Meta tags are text snippets in a website's code that describe the page's content. While not visible on the page itself, search engines and social media platforms use these tags to understand and display your content.</p>
+          <p className="mb-4">Meta tags are text snippets in a website&apos;s code that describe the page&apos;s content. While not visible on the page itself, search engines and social media platforms use these tags to understand and display your content.</p>
           <p className="mb-4">The title tag and meta description are crucial for SEO. The title tag appears as the clickable headline in search results, while the meta description is the summary below it. These elements are your opportunity to make a good first impression and encourage clicks on your link.</p>
           <p className="mb-4">Open Graph (OG) tags are special meta tags that control how your content appears when shared on social media. They ensure that your page displays with the correct image, title, and description when shared on platforms like Facebook or Twitter.</p>
           <p className="mt-4">Optimizing your meta tags helps search engines understand your page content, potentially improving your rankings. It also makes your links more appealing in search results and on social media, which can lead to increased clicks and site visits.</p>
@@ -542,13 +542,13 @@ const UTMLinkForge = () => {
                   <li>Encouraging more people to click on your links</li>
                   <li>Making your content look good when shared on social media</li>
                   <li>Helping search engines understand your content better</li>
-                  <li>Improving your site's visibility in both search and social</li>
+                  <li>Improving your site&apos;s visibility in both search and social</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger className="text-left">
-                What's the best length for meta tags?
+                What&apos;s the best length for meta tags?
               </AccordionTrigger>
               <AccordionContent>
                 <p>Here are the ideal lengths for meta tags:</p>
@@ -572,7 +572,7 @@ const UTMLinkForge = () => {
                 <ul className="list-disc pl-5 mt-2 space-y-1">
                   <li>Be consistent with your naming</li>
                   <li>Use them for all external marketing efforts</li>
-                  <li>Don't use them for internal links on your site</li>
+                  <li>Don&apos;t use them for internal links on your site</li>
                   <li>Check your UTM data regularly in your analytics</li>
                   <li>Use a URL shortener for cleaner links</li>
                   <li>Create a guide for your team to ensure everyone uses them the same way</li>
@@ -630,7 +630,7 @@ const UTMLinkForge = () => {
                   <li>Hreflang tags for international SEO: These tags tell search engines which language you are using on a specific page, so the search engine can serve that result to users searching in that language.</li>
                   <li>Canonical tags: These tags help search engines understand which version of a URL you want to appear in search results, useful for avoiding duplicate content issues.</li>
                   <li>AMP pages: Accelerated Mobile Pages are a web component framework for building fast-loading mobile web pages, improving user experience and potentially boosting search rankings.</li>
-                  <li>Meta robots tags: These tags provide instructions to search engine crawlers about how to crawl or index page content, giving you more control over your site's appearance in search results.</li>
+                  <li>Meta robots tags: These tags provide instructions to search engine crawlers about how to crawl or index page content, giving you more control over your site&apos;s appearance in search results.</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -640,7 +640,7 @@ const UTMLinkForge = () => {
               </AccordionTrigger>
               <AccordionContent>
                 <ol className="list-decimal pl-5 space-y-2">
-                  <li>Audit your website's meta tags quarterly to ensure they're up-to-date and optimized.</li>
+                  <li>Audit your website&apos;s meta tags quarterly to ensure they&apos;re up-to-date and optimized.</li>
                   <li>Use tools like Google Optimize to A/B test meta descriptions, focusing on one variable at a time.</li>
                   <li>Create a UTM parameter guide document and train your team on consistent usage.</li>
                   <li>Use QR codes on physical products, in-store displays, or event materials to bridge offline and online experiences.</li>
@@ -648,7 +648,7 @@ const UTMLinkForge = () => {
                   <li>Add schema markup for your organization, products, and key content types to enhance search visibility.</li>
                   <li>Set up a UTM tracking dashboard in Google Analytics or your preferred analytics tool.</li>
                   <li>Regularly update the content linked to QR codes and use dynamic QR codes for easier management.</li>
-                  <li>Use tools like SEMrush or Ahrefs to analyze competitors' meta tags and identify opportunities.</li>
+                  <li>Use tools like SEMrush or Ahrefs to analyze competitors&apos; meta tags and identify opportunities.</li>
                   <li>Maintain a log of meta tag changes to track their impact on search performance over time.</li>
                 </ol>
               </AccordionContent>
@@ -658,7 +658,7 @@ const UTMLinkForge = () => {
 
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300">
           <h3 className="text-2xl font-bold mb-3 text-white">Use Scoop for Free</h3>
-          <p className="mb-4 text-gray-100">Unlock powerful digital marketing tools with Scoop's free UTM builder, QR code generator, and meta tag preview. Optimize your campaigns, track performance, and boost online visibility effortlessly. Perfect for marketers, businesses, and content creators looking to enhance their digital strategy without cost.</p>
+          <p className="mb-4 text-gray-100">Unlock powerful digital marketing tools with Scoop&apos;s free UTM builder, QR code generator, and meta tag preview. Optimize your campaigns, track performance, and boost online visibility effortlessly. Perfect for marketers, businesses, and content creators looking to enhance their digital strategy without cost.</p>
           <Button 
             className="w-full bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-300 font-semibold py-3 rounded-lg shadow-md"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
