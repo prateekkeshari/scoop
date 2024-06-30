@@ -51,12 +51,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/scoop.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/icons/scoop.png" />
-        <link rel="mask-icon" href="/icons/scoop.svg" color="#000000" />
+        <link rel="icon" href="/icons/scoop.png" sizes="any" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
