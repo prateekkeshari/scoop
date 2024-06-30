@@ -17,6 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import Image from 'next/image';
 
 // Dynamically import icon components
 const Sun = dynamic(() => import('lucide-react').then(mod => mod.Sun), { ssr: false })
@@ -40,6 +41,21 @@ const UTMLinkForge = () => {
   const [showAlert, setShowAlert] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const generateUTMUrl = () => {
+    if (url && !isValidUrl(url)) {
+      setErrorMessage('Invalid URL. Please enter a valid URL.')
+      return
+    }
+    setErrorMessage('')
+    const params = new URLSearchParams()
+    Object.entries(utmValues).forEach(([key, value]) => {
+      if (value) params.append(`utm_${key}`, value)
+    })
+    const urlWithProtocol = url.startsWith('http') ? url : `https://${url}`
+    const utmUrl = `${urlWithProtocol}${params.toString() ? '?' + params.toString() : ''}`
+    setGeneratedUrl(utmUrl)
+  }
+
   useEffect(() => {
     // Load the URL and UTM values from localStorage when the component mounts
     const savedUrl = localStorage.getItem('savedUrl')
@@ -57,11 +73,11 @@ const UTMLinkForge = () => {
   }, [])
 
   useEffect(() => {
-    generateUTMUrl()
+    generateUTMUrl();
     // Save the URL and UTM values to localStorage whenever they change
-    localStorage.setItem('savedUrl', url)
-    localStorage.setItem('savedUtmValues', JSON.stringify(utmValues))
-  }, [url, utmValues])
+    localStorage.setItem('savedUrl', url);
+    localStorage.setItem('savedUtmValues', JSON.stringify(utmValues));
+  }, [url, utmValues, generateUTMUrl]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -86,20 +102,7 @@ const UTMLinkForge = () => {
     }
   }
 
-  const generateUTMUrl = () => {
-    if (url && !isValidUrl(url)) {
-      setErrorMessage('Invalid URL. Please enter a valid URL.')
-      return
-    }
-    setErrorMessage('')
-    const params = new URLSearchParams()
-    Object.entries(utmValues).forEach(([key, value]) => {
-      if (value) params.append(`utm_${key}`, value)
-    })
-    const urlWithProtocol = url.startsWith('http') ? url : `https://${url}`
-    const utmUrl = `${urlWithProtocol}${params.toString() ? '?' + params.toString() : ''}`
-    setGeneratedUrl(utmUrl)
-  }
+ 
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedUrl)
@@ -189,30 +192,30 @@ const UTMLinkForge = () => {
 
   const applyGrayscale = (imageDataUrl: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const img = new Image();
+      const img = new window.Image(); // Explicitly use window.Image
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
         canvas.width = img.width;
         canvas.height = img.height;
         
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imageData.data;
-          
-          for (let i = 0; i < data.length; i += 4) {
-            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            data[i] = avg;
-            data[i + 1] = avg;
-            data[i + 2] = avg;
-          }
-          
-          ctx.putImageData(imageData, 0, 0);
-          resolve(canvas.toDataURL());
-        } else {
-          reject(new Error('Could not get canvas context'));
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+          data[i] = avg;
+          data[i + 1] = avg;
+          data[i + 2] = avg;
         }
+        
+        ctx.putImageData(imageData, 0, 0);
+        resolve(canvas.toDataURL());
       };
       img.onerror = reject;
       img.src = imageDataUrl;
@@ -360,11 +363,11 @@ const UTMLinkForge = () => {
             ) : preview ? (
               <div className="space-y-4 flex-grow">
                 {preview.ogImage && (
-                  <img src={preview.ogImage} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
+                  <Image src={preview.ogImage} alt="Preview" width={600} height={300} className="w-full h-48 object-cover rounded-lg" />
                 )}
                 <div className="flex items-center space-x-2">
                   {preview.favicon && (
-                    <img src={preview.favicon} alt="Favicon" className="w-4 h-4" />
+                    <Image src={preview.favicon} alt="Favicon" width={16} height={16} className="w-4 h-4" />
                   )}
                   <p className="text-sm text-gray-500 truncate">{new URL(preview.url).hostname}</p>
                 </div>
@@ -379,7 +382,7 @@ const UTMLinkForge = () => {
           </CardContent>
         </Card>
       </section>
-      
+
       <AnimatePresence>
         {isDrawerOpen && (
           <motion.div
@@ -387,7 +390,7 @@ const UTMLinkForge = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             onClick={() => setIsDrawerOpen(false)}
           >
             <motion.div
@@ -395,11 +398,23 @@ const UTMLinkForge = () => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white dark:bg-[#0A0A0B] p-6 rounded-t-2xl w-full max-w-lg"
+              className="bg-white dark:bg-[#0A0A0B] p-6 rounded-2xl w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-xl font-semibold mb-4">QR Code Generator</h2>
-              <div className="flex justify-center mb-4">
+              <div className="mb-4">
+                <Label htmlFor="qr-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  QR code URL
+                </Label>
+                <Input
+                  id="qr-text"
+                  type="text"
+                  value={generatedUrl || url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="w-full"
+                  placeholder="Enter text for QR code"
+                />
+              </div>
+              <div className="flex justify-center mb-6">
                 <QRCode
                   id="qr-code"
                   value={generatedUrl || url}
@@ -416,8 +431,9 @@ const UTMLinkForge = () => {
                   } : undefined}
                 />
               </div>
-              <div className="flex justify-between mb-4">
-                <Button onClick={() => document.getElementById('logo-upload')?.click()} variant="outline">
+              
+              <div className="flex justify-between mb-6">
+                <Button onClick={() => document.getElementById('logo-upload')?.click()} variant="outline" className="w-1/2 mr-2">
                   Upload Logo
                 </Button>
                 <input
@@ -427,10 +443,13 @@ const UTMLinkForge = () => {
                   onChange={handleLogoUpload}
                   className="hidden"
                 />
-                <Button onClick={downloadQR} variant="default">
+                <Button onClick={downloadQR} variant="default" className="w-1/2 ml-2">
                   <Download className="mr-2 h-4 w-4" /> Download QR
                 </Button>
               </div>
+              <Button onClick={() => setIsDrawerOpen(false)} variant="outline" className="w-full">
+                Close
+              </Button>
             </motion.div>
           </motion.div>
         )}
