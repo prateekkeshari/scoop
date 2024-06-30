@@ -7,20 +7,40 @@ import { Analytics } from '@vercel/analytics/react'
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Scoop – UTM, QR, and Preview generator",
-  description: "Scoop is a simple tool to generate UTM parameters, QR codes, and social media previews for your marketing campaigns.",
+  title: "Scoop – Free UTM Builder, QR Code Generator, and Link Preview Tool",
+  description: "Create custom UTM links, generate QR codes, and preview social media links with Scoop. Boost your marketing campaigns with our free, all-in-one tool.",
+  keywords: "UTM builder, QR code generator, link preview, marketing tools, campaign tracking, social media preview",
   openGraph: {
-    title: "Scoop – UTM, QR, and Preview generator",
-    description: "Scoop is a simple tool to generate UTM parameters, QR codes, and social media previews for your marketing campaigns.",
+    title: "Scoop – Free UTM Builder, QR Code Generator, and Link Preview Tool",
+    description: "Create custom UTM links, generate QR codes, and preview social media links with Scoop. Boost your marketing campaigns with our free, all-in-one tool.",
+    url: "https://scoop.prateekkeshari.com",
+    siteName: "Scoop",
     images: [
       {
         url: "/og-image.jpg",
-        width: 1920,
-        height: 1080,
-        alt: "Scoop OG Image",
+        width: 1200,
+        height: 630,
+        alt: "Scoop - UTM, QR, and Preview generator",
       },
     ],
+    locale: "en_US",
+    type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Scoop – Free UTM Builder, QR Code Generator, and Link Preview Tool",
+    description: "Create custom UTM links, generate QR codes, and preview social media links with Scoop. Boost your marketing campaigns with our free, all-in-one tool.",
+    images: ["/twitter-image.jpg"],
+    creator: "@prateekkeshari",
+  },
+  robots: {
+    index: true,
+    follow: true
+  },
+  metadataBase: new URL("https://scoop.prateekkeshari.com"),
+  alternates: {
+    canonical: "/"
+  }
 }
 
 export default function RootLayout({
@@ -30,6 +50,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <main className="bg-background text-foreground">
