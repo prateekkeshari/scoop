@@ -35,7 +35,26 @@ const UTMLinkForge = () => {
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
+    // Load the URL and UTM values from localStorage when the component mounts
+    const savedUrl = localStorage.getItem('savedUrl')
+    const savedUtmValues = localStorage.getItem('savedUtmValues')
+    const savedPreview = localStorage.getItem('savedPreview')
+    if (savedUrl) {
+      setUrl(savedUrl)
+    }
+    if (savedUtmValues) {
+      setUtmValues(JSON.parse(savedUtmValues))
+    }
+    if (savedPreview) {
+      setPreview(JSON.parse(savedPreview))
+    }
+  }, [])
+
+  useEffect(() => {
     generateUTMUrl()
+    // Save the URL and UTM values to localStorage whenever they change
+    localStorage.setItem('savedUrl', url)
+    localStorage.setItem('savedUtmValues', JSON.stringify(utmValues))
   }, [url, utmValues])
 
   useEffect(() => {
@@ -92,6 +111,7 @@ const UTMLinkForge = () => {
     try {
       const response = await axios.get(`/api/preview?url=${encodeURIComponent(generatedUrl)}`)
       setPreview(response.data)
+      localStorage.setItem('savedPreview', JSON.stringify(response.data))
     } catch (error) {
       console.error('Error fetching preview:', error)
       setPreview(null)
