@@ -1,11 +1,5 @@
 import { NextResponse } from 'next/server'
 import QRCode from 'qrcode'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'QR Code Generator | Scoop by Prateek',
-  description: 'Generate QR codes for any URL',
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -33,7 +27,7 @@ export async function GET(request: Request) {
       'Content-Type': 'image/png',
     }
 
-    const filename = `QR_Code_${encodeURIComponent(data)}.png`.replace(/%20/g, '_')
+    const filename = `QR_Code_${encodeURIComponent(data).replace(/%20/g, '_')}.png`
 
     if (download) {
       headers['Content-Disposition'] = `attachment; filename="${filename}"`
