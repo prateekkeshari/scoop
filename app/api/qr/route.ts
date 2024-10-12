@@ -33,10 +33,12 @@ export async function GET(request: Request) {
       'Content-Type': 'image/png',
     }
 
+    const filename = `QR_Code_${encodeURIComponent(data)}.png`.replace(/%20/g, '_')
+
     if (download) {
-      headers['Content-Disposition'] = `attachment; filename="qr-code.png"`
+      headers['Content-Disposition'] = `attachment; filename="${filename}"`
     } else {
-      headers['Content-Disposition'] = `inline; filename="qr-code.png"`
+      headers['Content-Disposition'] = `inline; filename="${filename}"`
     }
 
     return new NextResponse(qrCodeBuffer, { headers })
