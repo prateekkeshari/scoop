@@ -12,13 +12,10 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Properly handle the data URL, preserving all query parameters
+    // Decode the URL once, as it should now be properly encoded from the client
     const decodedData = decodeURIComponent(data)
-    const [baseUrl, queryString] = decodedData.split('?')
-    const urlParams = new URLSearchParams(queryString || '')
-    const fullUrl = `${baseUrl}?${urlParams.toString()}`
 
-    const qrCodeDataURL = await QRCode.toDataURL(fullUrl, {
+    const qrCodeDataURL = await QRCode.toDataURL(decodedData, {
       width: size,
       margin: 1,
       color: {
@@ -27,9 +24,7 @@ export async function GET(request: Request) {
       },
     })
 
-    const filename = `QR_Code_${encodeURIComponent(baseUrl).replace(/%20/g, '_')}.png`
-
-    const safeData = encodeURIComponent(fullUrl)
+    const filename = `QR_Code_${encodeURIComponent(decodedData.split('?')[0]).replace(/%20/g, '_')}.png`
 
     const html = `
       <!DOCTYPE html>
@@ -37,7 +32,7 @@ export async function GET(request: Request) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>QR Code for ${baseUrl}</title>
+        <title>QR Code for ${decodedData.split('?')[0]}</title>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -59,7 +54,7 @@ export async function GET(request: Request) {
                 </div>
                 <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   <p>This QR code leads to:</p>
-                  <a href="${safeData}" class="text-blue-600 dark:text-blue-400 hover:underline break-all" target="_blank" rel="noopener noreferrer">${safeData}</a>
+                  <a href="${decodedData}" class="text-blue-600 dark:text-blue-400 hover:underline break-all" target="_blank" rel="noopener noreferrer">${decodedData}</a>
                 </div>
                 <div class="flex justify-between items-center">
                   <a href="${qrCodeDataURL}" download="${filename}" id="downloadLink" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors duration-200">Download QR Code</a>
