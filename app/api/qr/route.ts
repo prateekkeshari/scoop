@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server'
 import QRCode from 'qrcode'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'QR Code Generator | Scoop by Prateek',
+  description: 'Generate QR codes for any URL',
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
