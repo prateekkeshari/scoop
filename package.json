@@ -37,7 +37,7 @@
     "nanoid": "^5.0.7",
     "next": "14.2.4",
     "next-themes": "^0.3.0",
-    "qrcode": "^1.5.3",
+    "qrcode": "^1.5.4",
     "qrcode.react": "^3.1.0",
     "react": "^18",
     "react-dom": "^18",
