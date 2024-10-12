@@ -54,7 +54,7 @@ export async function GET(request: Request) {
                 </div>
                 <div class="flex justify-center">
                   <a href="${qrCodeDataURL}" download="${filename}" id="downloadLink" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors duration-200">Download QR Code</a>
-                  <a href="https://scoop.prateekkeshari.com" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Check out Scoop</a>
+                  <a href="https://scoop.prateekkeshari.com" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Create a new one</a>
                 </div>
               </div>
             </div>
