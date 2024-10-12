@@ -43,7 +43,7 @@ export async function GET(request: Request) {
           <div class="w-full max-w-md">
             <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden">
               <div class="p-6">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Download should begin automatically.</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Download should begin automatically.</p>
                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   <p>This QR code leads to:</p>
                   <a href="${decodedData}" class="text-blue-600 dark:text-blue-400 hover:underline break-all" target="_blank" rel="noopener noreferrer">${decodedData}</a>
