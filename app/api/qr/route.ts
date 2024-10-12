@@ -29,23 +29,42 @@ export async function GET(request: Request) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>QR Code for ${data}</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
         <style>
-          body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; flex-direction: column; }
-          img { max-width: 100%; height: auto; }
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+          body { font-family: 'Inter', sans-serif; }
         </style>
       </head>
-      <body>
-        <h1>QR Code for ${data}</h1>
-        <img src="${qrCodeDataURL}" alt="QR Code" />
-        <p>Your download should start automatically. If it doesn't, <a href="${qrCodeDataURL}" download="${filename}">click here</a>.</p>
+      <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <div class="min-h-screen flex flex-col items-center justify-center p-4">
+          <div class="w-full max-w-md">
+            <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden">
+              <div class="p-6">
+                <h1 class="text-2xl font-bold mb-4 flex items-center">
+                  <img src="https://scoop.prateekkeshari.com/icons/scoop.png" alt="Scoop Icon" class="h-6 w-6 mr-2">
+                  <span>Scoop QR Code</span>
+                </h1>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Scan this QR code to open the link</p>
+                <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6 flex justify-center">
+                  <img src="${qrCodeDataURL}" alt="QR Code" class="max-w-full h-auto">
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  <p>This QR code leads to:</p>
+                  <a href="${data}" class="text-blue-600 dark:text-blue-400 hover:underline break-all" target="_blank" rel="noopener noreferrer">${data}</a>
+                </div>
+                <div class="flex justify-between items-center">
+                  <a href="${qrCodeDataURL}" download="${filename}" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors duration-200">Download QR Code</a>
+                  <a href="https://scoop.prateekkeshari.com" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Create your own QR code</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <script>
-          // Trigger download
-          const link = document.createElement('a');
-          link.href = '${qrCodeDataURL}';
-          link.download = '${filename}';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          // Check if the user's preferred color scheme is dark
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+          }
         </script>
       </body>
       </html>
