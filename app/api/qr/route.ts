@@ -2,21 +2,20 @@ import { NextResponse } from 'next/server'
 import QRCode from 'qrcode'
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const data = searchParams.get('data')
-  const size = parseInt(searchParams.get('size') || '300', 10)
-  const download = searchParams.get('download') === 'true'
+  const url = new URL(request.url)
+  const fullPath = url.pathname + url.search
+  const dataStartIndex = fullPath.indexOf('data=') + 5
+  const data = fullPath.slice(dataStartIndex)
 
   if (!data) {
     return NextResponse.json({ error: 'Missing data parameter' }, { status: 400 })
   }
 
   try {
-    // Decode the URL once, as it should now be properly encoded from the client
     const decodedData = decodeURIComponent(data)
 
     const qrCodeDataURL = await QRCode.toDataURL(decodedData, {
-      width: size,
+      width: 300,
       margin: 1,
       color: {
         dark: '#000000',
@@ -70,11 +69,9 @@ export async function GET(request: Request) {
             document.documentElement.classList.add('dark');
           }
           
-          // Trigger download automatically if 'download' parameter is true
-          if (${download}) {
-            window.onload = function() {
-              document.getElementById('downloadLink').click();
-            }
+          // Trigger download automatically
+          window.onload = function() {
+            document.getElementById('downloadLink').click();
           }
         </script>
       </body>
