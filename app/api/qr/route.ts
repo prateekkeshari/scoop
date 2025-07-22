@@ -1,5 +1,171 @@
 import { NextResponse } from 'next/server'
 import QRCode from 'qrcode'
+import { createCanvas, loadImage } from 'canvas'
+
+function getFaviconUrl(websiteUrl: string): string {
+  try {
+    const url = new URL(websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`)
+    const domain = url.hostname
+    // Use Google's favicon service with larger size for better quality
+    return `https://www.google.com/s2/favicons?sz=128&domain=${domain}`
+  } catch (error) {
+    // Fallback to GetYourGuide favicon if URL parsing fails
+    return 'https://www.google.com/s2/favicons?sz=128&domain=getyourguide.com'
+  }
+}
+
+async function createBrandedQRCode(data: string, options: {
+  text?: string;
+  frameColor?: string;
+  textColor?: string;
+  showFrame?: boolean;
+}): Promise<string> {
+  const qrSize = 300 // Define outside try block for use in catch
+  
+  try {
+    const { text, frameColor = '#00d4aa', textColor = '#ffffff', showFrame = false } = options
+    
+    // Calculate canvas size based on whether we need frame and text
+    const frameThickness = showFrame ? 20 : 0
+    const textHeight = text ? 60 : 0
+    const canvasWidth = qrSize + (frameThickness * 2)
+    const canvasHeight = qrSize + (frameThickness * 2) + textHeight
+    
+    // Generate QR code as buffer with high error correction for logo embedding
+    const qrBuffer = await QRCode.toBuffer(data, {
+      width: qrSize,
+      margin: 1,
+      errorCorrectionLevel: 'H', // High error correction allows for logo embedding
+      color: {
+        dark: '#000000',
+        light: '#ffffff',
+      },
+    })
+
+    // Create canvas and load QR code image
+    const canvas = createCanvas(canvasWidth, canvasHeight)
+    const ctx = canvas.getContext('2d')
+    
+    // Fill background color if frame is enabled
+    if (showFrame) {
+      ctx.fillStyle = frameColor
+      
+      // Create rounded rectangle manually
+      const radius = 20
+      ctx.beginPath()
+      ctx.moveTo(radius, 0)
+      ctx.lineTo(canvasWidth - radius, 0)
+      ctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, radius)
+      ctx.lineTo(canvasWidth, canvasHeight - radius)
+      ctx.quadraticCurveTo(canvasWidth, canvasHeight, canvasWidth - radius, canvasHeight)
+      ctx.lineTo(radius, canvasHeight)
+      ctx.quadraticCurveTo(0, canvasHeight, 0, canvasHeight - radius)
+      ctx.lineTo(0, radius)
+      ctx.quadraticCurveTo(0, 0, radius, 0)
+      ctx.closePath()
+      ctx.fill()
+    }
+    
+    // Add white background for QR code if frame is enabled
+    if (showFrame) {
+      ctx.fillStyle = '#ffffff'
+      const qrBackgroundRadius = 10
+      const qrBackgroundX = frameThickness - 5
+      const qrBackgroundY = frameThickness - 5
+      const qrBackgroundSize = qrSize + 10
+      
+      ctx.beginPath()
+      ctx.moveTo(qrBackgroundX + qrBackgroundRadius, qrBackgroundY)
+      ctx.lineTo(qrBackgroundX + qrBackgroundSize - qrBackgroundRadius, qrBackgroundY)
+      ctx.quadraticCurveTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY, qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundRadius)
+      ctx.lineTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundSize - qrBackgroundRadius)
+      ctx.quadraticCurveTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundSize, qrBackgroundX + qrBackgroundSize - qrBackgroundRadius, qrBackgroundY + qrBackgroundSize)
+      ctx.lineTo(qrBackgroundX + qrBackgroundRadius, qrBackgroundY + qrBackgroundSize)
+      ctx.quadraticCurveTo(qrBackgroundX, qrBackgroundY + qrBackgroundSize, qrBackgroundX, qrBackgroundY + qrBackgroundSize - qrBackgroundRadius)
+      ctx.lineTo(qrBackgroundX, qrBackgroundY + qrBackgroundRadius)
+      ctx.quadraticCurveTo(qrBackgroundX, qrBackgroundY, qrBackgroundX + qrBackgroundRadius, qrBackgroundY)
+      ctx.closePath()
+      ctx.fill()
+    }
+
+    // Load QR code image
+    const qrImage = await loadImage(qrBuffer)
+    const qrX = frameThickness
+    const qrY = frameThickness
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+
+    // Calculate center area to excavate
+    const centerX = qrX + (qrSize / 2)
+    const centerY = qrY + (qrSize / 2)
+    const excavationRadius = 35 // Size of the area to clear in the center
+
+    // Excavate the center area (make it white/empty)
+    ctx.fillStyle = '#ffffff'
+    ctx.beginPath()
+    ctx.arc(centerX, centerY, excavationRadius, 0, 2 * Math.PI)
+    ctx.fill()
+
+    // Load and overlay brand logo (favicon from the website)
+    try {
+      const faviconUrl = getFaviconUrl(data)
+      const brandLogo = await loadImage(faviconUrl)
+      
+              // Calculate logo size to fit nicely in the excavated area
+        const logoSize = 50
+        const logoX = centerX - (logoSize / 2)
+        const logoY = centerY - (logoSize / 2)
+        const backgroundRadius = logoSize / 2 + 6
+
+
+
+      // Create circular clipping path for the logo
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, logoSize / 2 - 2, 0, 2 * Math.PI)
+      ctx.clip()
+
+      // Draw the brand logo (clipped to circle)
+      ctx.drawImage(brandLogo, logoX, logoY, logoSize, logoSize)
+      
+      // Restore context
+      ctx.restore()
+    } catch (logoError) {
+      console.warn('Failed to load website favicon, using excavated QR code:', logoError)
+      
+      // Even without logo, keep the excavated center clean
+      ctx.fillStyle = '#f8f8f8'
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI)
+      ctx.fill()
+    }
+
+    // Add text at the bottom if provided
+    if (text && showFrame) {
+      ctx.fillStyle = textColor
+      ctx.font = 'bold 24px Inter, Arial, sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      
+      const textY = qrY + qrSize + (textHeight / 2)
+      ctx.fillText(text, canvasWidth / 2, textY)
+    }
+
+    // Convert canvas to data URL
+    return canvas.toDataURL('image/png')
+  } catch (error) {
+    console.error('Error creating branded QR code:', error)
+    // Fallback to regular QR code if branding fails
+    return await QRCode.toDataURL(data, {
+      width: qrSize,
+      margin: 1,
+      errorCorrectionLevel: 'H',
+      color: {
+        dark: '#000000',
+        light: '#ffffff',
+      },
+    })
+  }
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
@@ -13,17 +179,21 @@ export async function GET(request: Request) {
 
   try {
     const decodedData = decodeURIComponent(data)
-
-    const qrCodeDataURL = await QRCode.toDataURL(decodedData, {
-      width: 300,
-      margin: 1,
-      color: {
-        dark: '#000000',
-        light: '#ffffff',
-      },
+    
+    // Always generate both versions
+    const basicQrCodeDataURL = await createBrandedQRCode(decodedData, {
+      showFrame: false
+    })
+    
+    const framedQrCodeDataURL = await createBrandedQRCode(decodedData, {
+      frameColor: '#ff5533',
+      textColor: '#ffffff',
+      showFrame: true
     })
 
-    const filename = `QR_Code_${encodeURIComponent(decodedData.split('?')[0]).replace(/%20/g, '_')}.png`
+    const domain = decodedData.split('?')[0].replace(/^https?:\/\//, '').replace(/^www\./, '')
+    const basicFilename = `${domain}_Logo_QR.png`
+    const framedFilename = `${domain}_Framed_QR.png`
 
     const html = `
       <!DOCTYPE html>
@@ -31,7 +201,7 @@ export async function GET(request: Request) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>QR Code for ${decodedData.split('?')[0]}</title>
+        <title>Logo QR Codes for ${decodedData.split('?')[0]}</title>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -40,23 +210,62 @@ export async function GET(request: Request) {
       </head>
       <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <div class="min-h-screen flex flex-col items-center justify-center p-4">
-          <div class="w-full max-w-md">
-            <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden">
-              <div class="p-6">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Download should begin automatically.</p>
-                 <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  <p>This QR code leads to:</p>
-                  <a href="${decodedData}" class="text-blue-600 dark:text-blue-400 hover:underline break-all" target="_blank" rel="noopener noreferrer">${decodedData}</a>
-                </div>
-                <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6 flex justify-center">
-                  <img src="${qrCodeDataURL}" alt="QR Code" class="max-w-full h-auto">
-                </div>
-               
-                <div class="flex justify-between items-center">
-                  <a href="${qrCodeDataURL}" download="${filename}" id="downloadLink" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors duration-200">Download QR Code</a>
-                  <a href="https://scoop.prateekkeshari.com" class="text-sm text-gray-600 dark:text-gray-400 hover:underline ml-4">Create a new one</a>
+          <div class="w-full max-w-4xl">
+            <div class="text-center mb-8">
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <div class="w-4 h-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
+                <h1 class="text-xl font-semibold">Your Logo QR Codes</h1>
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p>This QR code leads to:</p>
+                <a href="${decodedData}" class="text-blue-600 dark:text-blue-400 hover:underline break-all" target="_blank" rel="noopener noreferrer">${decodedData}</a>
+              </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+              <!-- Basic QR Code -->
+              <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden">
+                <div class="p-6">
+                  <h3 class="text-lg font-semibold mb-3 text-center">Basic Logo QR</h3>
+                  <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4 flex justify-center">
+                    <img src="${basicQrCodeDataURL}" alt="Basic Branded QR Code" class="max-w-full h-auto rounded-lg" style="max-width: 250px;">
+                  </div>
+                  <div class="text-center">
+                    <a href="${basicQrCodeDataURL}" download="${basicFilename}" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors duration-200 inline-flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                                             Download Logo QR
+                    </a>
+                  </div>
                 </div>
               </div>
+
+              <!-- Framed QR Code -->
+              <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden">
+                <div class="p-6">
+                  <h3 class="text-lg font-semibold mb-3 text-center">Framed QR Code</h3>
+                  <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4 flex justify-center">
+                    <img src="${framedQrCodeDataURL}" alt="Framed QR Code" class="max-w-full h-auto rounded-lg" style="max-width: 250px;">
+                  </div>
+                  <div class="text-center">
+                    <a href="${framedQrCodeDataURL}" download="${framedFilename}" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-colors duration-200 inline-flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                      Download Framed QR
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-center mt-8">
+              <a href="https://scoop.prateekkeshari.com" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Create a new one</a>
             </div>
           </div>
         </div>
@@ -66,10 +275,7 @@ export async function GET(request: Request) {
             document.documentElement.classList.add('dark');
           }
           
-          // Trigger download automatically
-          window.onload = function() {
-            document.getElementById('downloadLink').click();
-          }
+          // No auto-download - let users choose their preferred style
         </script>
       </body>
       </html>
@@ -81,7 +287,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Error generating QR code:', error)
-    return NextResponse.json({ error: 'Failed to generate QR code' }, { status: 500 })
+    console.error('Error generating logo QR code:', error)
+    return NextResponse.json({ error: 'Failed to generate logo QR code' }, { status: 500 })
   }
 }
