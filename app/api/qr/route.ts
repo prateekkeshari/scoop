@@ -17,13 +17,14 @@ function getFaviconUrl(websiteUrl: string): string {
 async function createBrandedQRCode(data: string, options: {
   text?: string;
   frameColor?: string;
+  gradientColor?: string;
   textColor?: string;
   showFrame?: boolean;
 }): Promise<string> {
   const qrSize = 300 // Define outside try block for use in catch
   
   try {
-    const { text, frameColor = '#00d4aa', textColor = '#ffffff', showFrame = false } = options
+    const { text, frameColor = '#00d4aa', gradientColor, textColor = '#ffffff', showFrame = false } = options
     
     // Calculate canvas size based on whether we need frame and text
     const frameThickness = showFrame ? 20 : 0
@@ -48,7 +49,15 @@ async function createBrandedQRCode(data: string, options: {
     
     // Fill background color if frame is enabled
     if (showFrame) {
-      ctx.fillStyle = frameColor
+      // Create gradient or solid color fill
+      if (gradientColor) {
+        const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight)
+        gradient.addColorStop(0, frameColor)
+        gradient.addColorStop(1, gradientColor)
+        ctx.fillStyle = gradient
+      } else {
+        ctx.fillStyle = frameColor
+      }
       
       // Create rounded rectangle manually
       const radius = 20
@@ -180,20 +189,36 @@ export async function GET(request: Request) {
   try {
     const decodedData = decodeURIComponent(data)
     
-    // Always generate both versions
+    // Define color schemes
+    const colorSchemes = [
+      { name: 'Orange', color: '#ff5533', gradient: '#ff8f65', button: 'from-orange-500 to-red-500' },
+      { name: 'Ocean', color: '#3b82f6', gradient: '#1d4ed8', button: 'from-blue-500 to-blue-700' },
+      { name: 'Purple', color: '#8b5cf6', gradient: '#7c3aed', button: 'from-purple-500 to-purple-700' },
+      { name: 'Emerald', color: '#10b981', gradient: '#059669', button: 'from-emerald-500 to-emerald-700' },
+      { name: 'Rose', color: '#f43f5e', gradient: '#e11d48', button: 'from-rose-500 to-rose-700' },
+      { name: 'Sunset', color: '#f97316', gradient: '#dc2626', button: 'from-orange-500 to-red-600' }
+    ]
+
+    // Generate basic version
     const basicQrCodeDataURL = await createBrandedQRCode(decodedData, {
       showFrame: false
     })
     
-    const framedQrCodeDataURL = await createBrandedQRCode(decodedData, {
-      frameColor: '#ff5533',
-      textColor: '#ffffff',
-      showFrame: true
-    })
+    // Generate all framed versions
+    const framedVersions = await Promise.all(
+      colorSchemes.map(async (scheme) => ({
+        ...scheme,
+        dataURL: await createBrandedQRCode(decodedData, {
+          frameColor: scheme.color,
+          gradientColor: scheme.gradient,
+          textColor: '#ffffff',
+          showFrame: true
+        })
+      }))
+    )
 
-    const domain = decodedData.split('?')[0].replace(/^https?:\/\//, '').replace(/^www\./, '')
+        const domain = decodedData.split('?')[0].replace(/^https?:\/\//, '').replace(/^www\./, '')
     const basicFilename = `${domain}_Logo_QR.png`
-    const framedFilename = `${domain}_Framed_QR.png`
 
     const html = `
       <!DOCTYPE html>
@@ -210,7 +235,7 @@ export async function GET(request: Request) {
       </head>
       <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <div class="min-h-screen flex flex-col items-center justify-center p-4">
-          <div class="w-full max-w-4xl">
+          <div class="w-full max-w-6xl">
             <div class="text-center mb-8">
               <div class="flex items-center justify-center gap-2 mb-2">
                 <div class="w-4 h-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
@@ -222,45 +247,50 @@ export async function GET(request: Request) {
               </div>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-6">
-              <!-- Basic QR Code -->
-              <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden">
-                <div class="p-6">
-                  <h3 class="text-lg font-semibold mb-3 text-center">Basic Logo QR</h3>
-                  <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4 flex justify-center">
-                    <img src="${basicQrCodeDataURL}" alt="Basic Branded QR Code" class="max-w-full h-auto rounded-lg" style="max-width: 250px;">
-                  </div>
-                  <div class="text-center">
-                    <a href="${basicQrCodeDataURL}" download="${basicFilename}" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors duration-200 inline-flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7,10 12,15 17,10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                      </svg>
-                                             Download Logo QR
-                    </a>
-                  </div>
+            <!-- Basic QR Code -->
+            <div class="mb-12">
+              <h2 class="text-lg font-semibold mb-4 text-center">Basic Logo QR</h2>
+              <div class="bg-white dark:bg-black rounded-lg shadow-lg p-6 max-w-sm mx-auto">
+                <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4 flex justify-center">
+                  <img src="${basicQrCodeDataURL}" alt="Basic Logo QR Code" class="max-w-full h-auto rounded-lg" style="max-width: 200px;">
+                </div>
+                <div class="text-center">
+                  <a href="${basicQrCodeDataURL}" download="${basicFilename}" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors duration-200 inline-flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7,10 12,15 17,10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download Logo QR
+                  </a>
                 </div>
               </div>
+            </div>
 
-              <!-- Framed QR Code -->
-              <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden">
-                <div class="p-6">
-                  <h3 class="text-lg font-semibold mb-3 text-center">Framed QR Code</h3>
-                  <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4 flex justify-center">
-                    <img src="${framedQrCodeDataURL}" alt="Framed QR Code" class="max-w-full h-auto rounded-lg" style="max-width: 250px;">
+            <!-- Framed QR Codes -->
+            <div class="mb-8">
+              <h2 class="text-lg font-semibold mb-6 text-center">Choose Your Frame Style</h2>
+              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${framedVersions.map(version => `
+                  <div class="bg-white dark:bg-black rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200">
+                    <div class="p-4">
+                      <h3 class="text-md font-medium mb-3 text-center">${version.name}</h3>
+                      <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg mb-4 flex justify-center">
+                        <img src="${version.dataURL}" alt="${version.name} QR Code" class="max-w-full h-auto rounded-lg" style="max-width: 180px;">
+                      </div>
+                      <div class="text-center">
+                        <a href="${version.dataURL}" download="${domain}_${version.name}_QR.png" class="bg-gradient-to-r ${version.button} text-white px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-colors duration-200 inline-flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7,10 12,15 17,10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                          </svg>
+                          Download ${version.name}
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div class="text-center">
-                    <a href="${framedQrCodeDataURL}" download="${framedFilename}" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-colors duration-200 inline-flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7,10 12,15 17,10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                      </svg>
-                      Download Framed QR
-                    </a>
-                  </div>
-                </div>
+                `).join('')}
               </div>
             </div>
 
