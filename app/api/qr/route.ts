@@ -103,10 +103,10 @@ async function createBrandedQRCode(data: string, options: {
     const qrY = frameThickness
     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
 
-    // Calculate center area to excavate
+    // Calculate center area to excavate (larger for better logo visibility)
     const centerX = qrX + (qrSize / 2)
     const centerY = qrY + (qrSize / 2)
-    const excavationRadius = 35 // Size of the area to clear in the center
+    const excavationRadius = 45 // Increased size of the area to clear in the center
 
     // Excavate the center area (make it white/empty)
     ctx.fillStyle = '#ffffff'
@@ -119,33 +119,59 @@ async function createBrandedQRCode(data: string, options: {
       const faviconUrl = getFaviconUrl(data)
       const brandLogo = await loadImage(faviconUrl)
       
-              // Calculate logo size to fit nicely in the excavated area
-        const logoSize = 50
-        const logoX = centerX - (logoSize / 2)
-        const logoY = centerY - (logoSize / 2)
-        const backgroundRadius = logoSize / 2 + 6
+      // Calculate logo size to fit nicely in the larger excavated area
+      const backgroundRadius = excavationRadius - 5 // Use excavation radius with padding
+      const logoRadius = backgroundRadius - 12 // More generous padding for the logo
+      
+      // Draw white background circle for the logo with subtle shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.06)'
+      ctx.beginPath()
+      ctx.arc(centerX + 1, centerY + 1, backgroundRadius + 1, 0, 2 * Math.PI)
+      ctx.fill()
 
+      // Draw main white background
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, backgroundRadius, 0, 2 * Math.PI)
+      ctx.fill()
 
+      // Add subtle border for definition
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, backgroundRadius - 0.5, 0, 2 * Math.PI)
+      ctx.stroke()
 
-      // Create circular clipping path for the logo
+      // Create circular clipping path for the logo (with generous padding)
       ctx.save()
       ctx.beginPath()
-      ctx.arc(centerX, centerY, logoSize / 2 - 2, 0, 2 * Math.PI)
+      ctx.arc(centerX, centerY, logoRadius, 0, 2 * Math.PI)
       ctx.clip()
 
-      // Draw the brand logo (clipped to circle)
-      ctx.drawImage(brandLogo, logoX, logoY, logoSize, logoSize)
+      // Draw the brand logo (clipped to circle with better proportions)
+      const actualLogoSize = logoRadius * 2
+      const actualLogoX = centerX - logoRadius
+      const actualLogoY = centerY - logoRadius
+      ctx.drawImage(brandLogo, actualLogoX, actualLogoY, actualLogoSize, actualLogoSize)
       
       // Restore context
       ctx.restore()
     } catch (logoError) {
       console.warn('Failed to load website favicon, using excavated QR code:', logoError)
       
-      // Even without logo, keep the excavated center clean
+      // Even without logo, keep the excavated center clean with a subtle background
+      const fallbackRadius = excavationRadius - 5
       ctx.fillStyle = '#f8f8f8'
       ctx.beginPath()
-      ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI)
+      ctx.arc(centerX, centerY, fallbackRadius, 0, 2 * Math.PI)
       ctx.fill()
+      
+      // Add a subtle border
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, fallbackRadius - 0.5, 0, 2 * Math.PI)
+      ctx.stroke()
     }
 
     // Add text at the bottom if provided
@@ -279,7 +305,7 @@ export async function GET(request: Request) {
                         <img src="${version.dataURL}" alt="${version.name} QR Code" class="max-w-full h-auto rounded-lg" style="max-width: 180px;">
                       </div>
                       <div class="text-center">
-                        <a href="${version.dataURL}" download="${domain}_${version.name}_QR.png" class="bg-gradient-to-r ${version.button} text-white px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-colors duration-200 inline-flex items-center gap-2">
+                        <a href="${version.dataURL}" download="${domain}_${version.name}_QR.png" class="bg-black dark:bg-white text-white dark:text-black px-3 py-2 rounded-md text-sm font-medium hover:bg-opacity-80 transition-colors duration-200 inline-flex items-center gap-2 w-full justify-center">
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                             <polyline points="7,10 12,15 17,10"/>
