@@ -20,11 +20,13 @@ async function createBrandedQRCode(data: string, options: {
   gradientColor?: string;
   textColor?: string;
   showFrame?: boolean;
+  isSquare?: boolean;
+  noFrame?: boolean;
 }): Promise<string> {
   const qrSize = 300 // Define outside try block for use in catch
+  const { text, frameColor = '#00d4aa', gradientColor, textColor = '#ffffff', showFrame = false, isSquare = false, noFrame = false } = options
   
   try {
-    const { text, frameColor = '#00d4aa', gradientColor, textColor = '#ffffff', showFrame = false } = options
     
     // Calculate canvas size based on whether we need frame and text
     const frameThickness = showFrame ? 20 : 0
@@ -38,7 +40,7 @@ async function createBrandedQRCode(data: string, options: {
       margin: 1,
       errorCorrectionLevel: 'H', // High error correction allows for logo embedding
       color: {
-        dark: '#000000',
+        dark: noFrame ? frameColor : '#000000', // Use frame color for QR when noFrame is true
         light: '#ffffff',
       },
     })
@@ -47,8 +49,8 @@ async function createBrandedQRCode(data: string, options: {
     const canvas = createCanvas(canvasWidth, canvasHeight)
     const ctx = canvas.getContext('2d')
     
-    // Fill background color if frame is enabled
-    if (showFrame) {
+    // Fill background color if frame is enabled and noFrame is false
+    if (showFrame && !noFrame) {
       // Create gradient or solid color fill
       if (gradientColor) {
         const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight)
@@ -59,42 +61,54 @@ async function createBrandedQRCode(data: string, options: {
         ctx.fillStyle = frameColor
       }
       
-      // Create rounded rectangle manually
-      const radius = 20
-      ctx.beginPath()
-      ctx.moveTo(radius, 0)
-      ctx.lineTo(canvasWidth - radius, 0)
-      ctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, radius)
-      ctx.lineTo(canvasWidth, canvasHeight - radius)
-      ctx.quadraticCurveTo(canvasWidth, canvasHeight, canvasWidth - radius, canvasHeight)
-      ctx.lineTo(radius, canvasHeight)
-      ctx.quadraticCurveTo(0, canvasHeight, 0, canvasHeight - radius)
-      ctx.lineTo(0, radius)
-      ctx.quadraticCurveTo(0, 0, radius, 0)
-      ctx.closePath()
-      ctx.fill()
+      // Create frame - square or rounded based on isSquare flag
+      if (isSquare) {
+        // Simple square frame
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+      } else {
+        // Create rounded rectangle manually
+        const radius = 20
+        ctx.beginPath()
+        ctx.moveTo(radius, 0)
+        ctx.lineTo(canvasWidth - radius, 0)
+        ctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, radius)
+        ctx.lineTo(canvasWidth, canvasHeight - radius)
+        ctx.quadraticCurveTo(canvasWidth, canvasHeight, canvasWidth - radius, canvasHeight)
+        ctx.lineTo(radius, canvasHeight)
+        ctx.quadraticCurveTo(0, canvasHeight, 0, canvasHeight - radius)
+        ctx.lineTo(0, radius)
+        ctx.quadraticCurveTo(0, 0, radius, 0)
+        ctx.closePath()
+        ctx.fill()
+      }
     }
     
-    // Add white background for QR code if frame is enabled
-    if (showFrame) {
+    // Add white background for QR code if frame is enabled and noFrame is false
+    if (showFrame && !noFrame) {
       ctx.fillStyle = '#ffffff'
-      const qrBackgroundRadius = 10
       const qrBackgroundX = frameThickness - 5
       const qrBackgroundY = frameThickness - 5
       const qrBackgroundSize = qrSize + 10
       
-      ctx.beginPath()
-      ctx.moveTo(qrBackgroundX + qrBackgroundRadius, qrBackgroundY)
-      ctx.lineTo(qrBackgroundX + qrBackgroundSize - qrBackgroundRadius, qrBackgroundY)
-      ctx.quadraticCurveTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY, qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundRadius)
-      ctx.lineTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundSize - qrBackgroundRadius)
-      ctx.quadraticCurveTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundSize, qrBackgroundX + qrBackgroundSize - qrBackgroundRadius, qrBackgroundY + qrBackgroundSize)
-      ctx.lineTo(qrBackgroundX + qrBackgroundRadius, qrBackgroundY + qrBackgroundSize)
-      ctx.quadraticCurveTo(qrBackgroundX, qrBackgroundY + qrBackgroundSize, qrBackgroundX, qrBackgroundY + qrBackgroundSize - qrBackgroundRadius)
-      ctx.lineTo(qrBackgroundX, qrBackgroundY + qrBackgroundRadius)
-      ctx.quadraticCurveTo(qrBackgroundX, qrBackgroundY, qrBackgroundX + qrBackgroundRadius, qrBackgroundY)
-      ctx.closePath()
-      ctx.fill()
+      if (isSquare) {
+        // Simple square background for QR
+        ctx.fillRect(qrBackgroundX, qrBackgroundY, qrBackgroundSize, qrBackgroundSize)
+      } else {
+        // Rounded background for QR
+        const qrBackgroundRadius = 10
+        ctx.beginPath()
+        ctx.moveTo(qrBackgroundX + qrBackgroundRadius, qrBackgroundY)
+        ctx.lineTo(qrBackgroundX + qrBackgroundSize - qrBackgroundRadius, qrBackgroundY)
+        ctx.quadraticCurveTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY, qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundRadius)
+        ctx.lineTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundSize - qrBackgroundRadius)
+        ctx.quadraticCurveTo(qrBackgroundX + qrBackgroundSize, qrBackgroundY + qrBackgroundSize, qrBackgroundX + qrBackgroundSize - qrBackgroundRadius, qrBackgroundY + qrBackgroundSize)
+        ctx.lineTo(qrBackgroundX + qrBackgroundRadius, qrBackgroundY + qrBackgroundSize)
+        ctx.quadraticCurveTo(qrBackgroundX, qrBackgroundY + qrBackgroundSize, qrBackgroundX, qrBackgroundY + qrBackgroundSize - qrBackgroundRadius)
+        ctx.lineTo(qrBackgroundX, qrBackgroundY + qrBackgroundRadius)
+        ctx.quadraticCurveTo(qrBackgroundX, qrBackgroundY, qrBackgroundX + qrBackgroundRadius, qrBackgroundY)
+        ctx.closePath()
+        ctx.fill()
+      }
     }
 
     // Load QR code image
@@ -102,6 +116,34 @@ async function createBrandedQRCode(data: string, options: {
     const qrX = frameThickness
     const qrY = frameThickness
     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+
+    // Add rounded border for Square style (like reference image)
+    if (isSquare && noFrame) {
+      const borderRadius = 20
+      const borderWidth = 3
+      const padding = 12 // More spacing between border and QR code
+      
+      // Calculate border position with padding
+      const borderX = qrX - padding
+      const borderY = qrY - padding
+      const borderSize = qrSize + (padding * 2)
+      
+      // Draw rounded border around the QR code with padding
+      ctx.strokeStyle = frameColor // Use the same dark blue color
+      ctx.lineWidth = borderWidth
+      ctx.beginPath()
+      ctx.moveTo(borderX + borderRadius, borderY)
+      ctx.lineTo(borderX + borderSize - borderRadius, borderY)
+      ctx.quadraticCurveTo(borderX + borderSize, borderY, borderX + borderSize, borderY + borderRadius)
+      ctx.lineTo(borderX + borderSize, borderY + borderSize - borderRadius)
+      ctx.quadraticCurveTo(borderX + borderSize, borderY + borderSize, borderX + borderSize - borderRadius, borderY + borderSize)
+      ctx.lineTo(borderX + borderRadius, borderY + borderSize)
+      ctx.quadraticCurveTo(borderX, borderY + borderSize, borderX, borderY + borderSize - borderRadius)
+      ctx.lineTo(borderX, borderY + borderRadius)
+      ctx.quadraticCurveTo(borderX, borderY, borderX + borderRadius, borderY)
+      ctx.closePath()
+      ctx.stroke()
+    }
 
     // Calculate center area to excavate (larger for better logo visibility)
     const centerX = qrX + (qrSize / 2)
@@ -123,30 +165,59 @@ async function createBrandedQRCode(data: string, options: {
       const backgroundRadius = excavationRadius - 5 // Use excavation radius with padding
       const logoRadius = backgroundRadius - 12 // More generous padding for the logo
       
-      // Draw white background circle for the logo with subtle shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.06)'
-      ctx.beginPath()
-      ctx.arc(centerX + 1, centerY + 1, backgroundRadius + 1, 0, 2 * Math.PI)
-      ctx.fill()
+      if (isSquare) {
+        // Square background for logo (no rounded corners)
+        const squareSize = backgroundRadius * 2
+        const squareX = centerX - backgroundRadius
+        const squareY = centerY - backgroundRadius
+        
+        // Draw subtle shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.06)'
+        ctx.fillRect(squareX + 1, squareY + 1, squareSize, squareSize)
+        
+        // Draw main white background
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(squareX, squareY, squareSize, squareSize)
+        
+        // Add subtle border
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
+        ctx.lineWidth = 1
+        ctx.strokeRect(squareX, squareY, squareSize - 1, squareSize - 1)
+        
+        // Create square clipping path for the logo
+        ctx.save()
+        const logoSquareSize = logoRadius * 2
+        const logoSquareX = centerX - logoRadius
+        const logoSquareY = centerY - logoRadius
+        ctx.beginPath()
+        ctx.rect(logoSquareX, logoSquareY, logoSquareSize, logoSquareSize)
+        ctx.clip()
+      } else {
+        // Draw white background circle for the logo with subtle shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.06)'
+        ctx.beginPath()
+        ctx.arc(centerX + 1, centerY + 1, backgroundRadius + 1, 0, 2 * Math.PI)
+        ctx.fill()
 
-      // Draw main white background
-      ctx.fillStyle = '#ffffff'
-      ctx.beginPath()
-      ctx.arc(centerX, centerY, backgroundRadius, 0, 2 * Math.PI)
-      ctx.fill()
+        // Draw main white background
+        ctx.fillStyle = '#ffffff'
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, backgroundRadius, 0, 2 * Math.PI)
+        ctx.fill()
 
-      // Add subtle border for definition
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.arc(centerX, centerY, backgroundRadius - 0.5, 0, 2 * Math.PI)
-      ctx.stroke()
+        // Add subtle border for definition
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, backgroundRadius - 0.5, 0, 2 * Math.PI)
+        ctx.stroke()
 
-      // Create circular clipping path for the logo (with generous padding)
-      ctx.save()
-      ctx.beginPath()
-      ctx.arc(centerX, centerY, logoRadius, 0, 2 * Math.PI)
-      ctx.clip()
+        // Create circular clipping path for the logo (with generous padding)
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, logoRadius, 0, 2 * Math.PI)
+        ctx.clip()
+      }
 
       // Draw the brand logo (clipped to circle with better proportions)
       const actualLogoSize = logoRadius * 2
@@ -195,7 +266,7 @@ async function createBrandedQRCode(data: string, options: {
       margin: 1,
       errorCorrectionLevel: 'H',
       color: {
-        dark: '#000000',
+        dark: noFrame ? frameColor : '#000000',
         light: '#ffffff',
       },
     })
@@ -222,7 +293,8 @@ export async function GET(request: Request) {
       { name: 'Purple', color: '#8b5cf6', gradient: '#7c3aed', button: 'from-purple-500 to-purple-700' },
       { name: 'Emerald', color: '#10b981', gradient: '#059669', button: 'from-emerald-500 to-emerald-700' },
       { name: 'Rose', color: '#f43f5e', gradient: '#e11d48', button: 'from-rose-500 to-rose-700' },
-      { name: 'Sunset', color: '#f97316', gradient: '#dc2626', button: 'from-orange-500 to-red-600' }
+      { name: 'Sunset', color: '#f97316', gradient: '#dc2626', button: 'from-orange-500 to-red-600' },
+      { name: 'Square', color: '#1A2B49', gradient: undefined, button: 'from-gray-800 to-black', isSquare: true, noFrame: true }
     ]
 
     // Generate basic version
@@ -238,7 +310,9 @@ export async function GET(request: Request) {
           frameColor: scheme.color,
           gradientColor: scheme.gradient,
           textColor: '#ffffff',
-          showFrame: true
+          showFrame: true,
+          isSquare: scheme.isSquare || false,
+          noFrame: scheme.noFrame || false
         })
       }))
     )
